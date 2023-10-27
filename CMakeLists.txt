@@ -1,7 +1,15 @@
 project("DeepSDF")
 cmake_minimum_required(VERSION 3.0)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(CLI11 CONFIG REQUIRED)
+set(MYINSTALL_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third-party/dependency")
+list(APPEND CMAKE_PREFIX_PATH "${MYINSTALL_DIR}")
+
+find_package(Threads)
+
+add_subdirectory(third-party/CLI11)
+# find_package(CLI11 CONFIG REQUIRED)
 find_package(Eigen3 REQUIRED)
 find_package(nanoflann REQUIRED)
 find_package(Pangolin REQUIRED)
