@@ -202,3 +202,12 @@ DeepSDF is relased under the MIT License. See the [LICENSE file][5] for more det
 
 [5]: https://github.com/facebookresearch/DeepSDF/blob/master/LICENSE
 [6]: http://openaccess.thecvf.com/content_CVPR_2019/html/Park_DeepSDF_Learning_Continuous_Signed_Distance_Functions_for_Shape_Representation_CVPR_2019_paper.html
+
+# Myinstall
+
+```
+cd third-party
+mkdir dependency
+git clone --recursive git@github.com:CLIUtils/CLI11.git
+git clone -b v0.6 https://github.com/stevenlovegrove/Pangolin.git
+```
