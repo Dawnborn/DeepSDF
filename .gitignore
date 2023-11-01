@@ -1,0 +1,5 @@
+.history
+bin
+build
+data
+**/__pycache__

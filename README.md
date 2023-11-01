@@ -205,9 +205,13 @@ DeepSDF is relased under the MIT License. See the [LICENSE file][5] for more det
 
 # Myinstall
 
-```
-cd third-party
-mkdir dependency
-git clone --recursive git@github.com:CLIUtils/CLI11.git
-git clone -b v0.6 https://github.com/stevenlovegrove/Pangolin.git
-```
+ref to https://cerulean-seahorse-9a8.notion.site/DeepSDF-setup-b7081636f4f24944b567fd46df9996bd?pvs=4
+
+## Preprocessing
+
+original one is slow (2min per obj)
+
+We may use python api instead
+https://github.com/marian42/mesh_to_sdf/issues/41
+
+or some exisiting scripts https://github.com/marian42/shapegan

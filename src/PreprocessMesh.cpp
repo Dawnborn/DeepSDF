@@ -527,7 +527,7 @@ int main(int argc, char** argv) {
   std::vector<Eigen::Vector3f> xyz;
   std::vector<Eigen::Vector3f> xyz_surf;
   std::vector<float> sdf;
-  int num_samp_near_surf = (int)(47 * num_sample / 50);
+  int num_samp_near_surf = (int)(47 * num_sample / 50); // 大部分在表面上，其余靠近表面
   std::cout << "num_samp_near_surf: " << num_samp_near_surf << std::endl;
   SampleFromSurface(geom, xyz_surf, num_samp_near_surf / 2);
 
