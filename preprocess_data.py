@@ -10,6 +10,7 @@ import subprocess
 
 import deep_sdf
 import deep_sdf.workspace as ws
+from tqdm import tqdm
 
 
 def filter_classes_glob(patterns, classes):
@@ -89,14 +90,16 @@ if __name__ == "__main__":
         "--data_dir",
         "-d",
         dest="data_dir",
-        required=True,
+        # required=True,
+        default="data",
         help="The directory which holds all preprocessed data.",
     )
     arg_parser.add_argument(
         "--source",
         "-s",
         dest="source_dir",
-        required=True,
+        # required=True,
+        default="DATA/ScanARCW/canonical_mesh_manifoldplus",
         help="The directory which holds the data to preprocess and append.",
     )
     arg_parser.add_argument(
@@ -110,7 +113,8 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--split",
         dest="split_filename",
-        required=True,
+        # required=True,
+        default="examples/splits/sv2_sofas_all_manifoldplus_scanarcw.json",
         help="A split filename defining the shapes to be processed.",
     )
     arg_parser.add_argument(
@@ -123,7 +127,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--threads",
         dest="num_threads",
-        default=8,
+        default=10,
         help="The number of threads to use to process the data.",
     )
     arg_parser.add_argument(
@@ -149,7 +153,7 @@ if __name__ == "__main__":
 
     deep_sdf.configure_logging(args)
 
-    additional_general_args = []
+    additional_general_args = ["--sply"]
 
     deepsdf_dir = os.path.dirname(os.path.abspath(__file__))
     if args.surface_sampling:
@@ -164,13 +168,17 @@ if __name__ == "__main__":
         if args.test_sampling:
             additional_general_args += ["-t"]
 
+    if not os.path.isfile(executable):
+        print("excecutbale: {} not found!".format(executable))
+        raise RuntimeError
+
     with open(args.split_filename, "r") as f:
         split = json.load(f)
 
     if args.source_name is None:
         args.source_name = os.path.basename(os.path.normpath(args.source_dir))
 
-    dest_dir = os.path.join(args.data_dir, subdir, args.source_name)
+    dest_dir = os.path.join(args.data_dir, subdir, args.source_name) # 'data/SdfSamples/canonical_mesh_manifoldplus'
 
     logging.info(
         "Preprocessing data from "
@@ -196,7 +204,7 @@ if __name__ == "__main__":
     meshes_targets_and_specific_args = []
 
     for class_dir in class_directories:
-        class_path = os.path.join(args.source_dir, class_dir)
+        class_path = os.path.join(args.source_dir, class_dir) # 'DATA/ScanARCW/canonical_mesh_manifoldplus/04256520'
         instance_dirs = class_directories[class_dir]
 
         logging.debug(
@@ -208,9 +216,9 @@ if __name__ == "__main__":
         if not os.path.isdir(target_dir):
             os.mkdir(target_dir)
 
-        for instance_dir in instance_dirs:
+        for instance_dir in tqdm(instance_dirs):
 
-            shape_dir = os.path.join(class_path, instance_dir)
+            shape_dir = os.path.join(class_path, instance_dir) # 'DATA/ScanARCW/canonical_mesh_manifoldplus/04256520/f551048075b5042d7d6d37ceb4807b31_scene0239_00_ins_5'
 
             processed_filepath = os.path.join(target_dir, instance_dir + extension)
             if args.skip and os.path.isfile(processed_filepath):
@@ -237,14 +245,14 @@ if __name__ == "__main__":
 
                 meshes_targets_and_specific_args.append(
                     (
-                        os.path.join(shape_dir, mesh_filename),
+                        mesh_filename, # os.path.join(shape_dir, mesh_filename),
                         processed_filepath,
                         specific_args,
                     )
                 )
 
             except deep_sdf.data.NoMeshFileError:
-                logging.warning("No mesh found for instance " + instance_dir)
+                logging.warning("No mesh found for instance " + instance_dir + " in " + shape_dir)
             except deep_sdf.data.MultipleMeshFileError:
                 logging.warning("Multiple meshes found for instance " + instance_dir)
 
@@ -259,10 +267,10 @@ if __name__ == "__main__":
         ) in meshes_targets_and_specific_args:
             executor.submit(
                 process_mesh,
-                mesh_filepath,
-                target_filepath,
-                executable,
-                specific_args + additional_general_args,
+                mesh_filepath, # 'DATA/ScanARCW/canonical_mesh_manifoldplus/04256520/f551048075b5042d7d6d37ceb4807b31_scene0239_00_ins_5/model_canonical_manifoldplus.obj'
+                target_filepath, # 'data/SdfSamples/canonical_mesh_manifoldplus/04256520/f551048075b5042d7d6d37ceb4807b31_scene0239_00_ins_5.npz'
+                executable, # '/home/wiss/lhao/storage/user/hjp/ws_dditnach/DeepSDF/bin/PreprocessMesh'
+                specific_args + additional_general_args, # []
             )
 
         executor.shutdown()

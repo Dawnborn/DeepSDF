@@ -1,5 +1,6 @@
 .history
 bin
-build
+build*
 data
 **/__pycache__
+third-party

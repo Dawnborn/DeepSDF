@@ -167,7 +167,7 @@ std::pair<Eigen::Vector3f, float> ComputeNormalizationParameters(
   return {-1 * center, (1.f / maxDistance)};
 }
 
-float BoundingCubeNormalization(
+float BoundingCubeNormalization( //junpeng
     pangolin::Geometry& geom,
     bool fitToUnitSphere,
     const float buffer) {

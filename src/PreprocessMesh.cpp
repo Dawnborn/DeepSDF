@@ -197,7 +197,9 @@ void writeSDFToNPZ(
     std::vector<Eigen::Vector3f>& xyz,
     std::vector<float>& sdfs,
     std::string filename,
-    bool print_num = false) {
+    bool print_num = false,
+    const std::pair<Eigen::Vector3f, float>* normalizationParams = nullptr,
+    const std::string& mesh_filename = ""){
   unsigned int num_vert = xyz.size();
   std::vector<float> pos;
   std::vector<float> neg;
@@ -219,6 +221,15 @@ void writeSDFToNPZ(
 
   cnpy::npz_save(filename, "pos", &pos[0], {(long unsigned int)(pos.size() / 4.0), 4}, "w");
   cnpy::npz_save(filename, "neg", &neg[0], {(long unsigned int)(neg.size() / 4.0), 4}, "a");
+  if(normalizationParams){
+    cnpy::npz_save(filename, "translation_mesh2sdf", &(normalizationParams->first[0]), {3}, "a");
+    cnpy::npz_save(filename, "scale_mesh2sdf", &normalizationParams->second, {1}, "a");
+  }
+  if(!mesh_filename.empty()){
+    std::vector<char> string_data(mesh_filename.begin(), mesh_filename.end());
+    cnpy::npz_save(filename, "mesh_filename", &string_data[0], {mesh_filename.size()}, "a");
+  }
+
   if (print_num) {
     std::cout << "pos num: " << pos.size() / 4.0 << std::endl;
     std::cout << "neg num: " << neg.size() / 4.0 << std::endl;
@@ -304,6 +315,7 @@ int main(int argc, char** argv) {
   app.add_flag("--sply", save_ply, "save ply point cloud for visualization");
   app.add_flag("-t", test_flag, "test_flag");
   app.add_option("-n", spatial_samples_npz, "spatial samples from file");
+  // app.add_option("--normal", normalizationOutputFile, "save normalization");
 
   CLI11_PARSE(app, argc, argv);
 
@@ -327,7 +339,7 @@ int main(int argc, char** argv) {
 
   pangolin::Geometry geom = pangolin::LoadGeometry(meshFileName);
 
-  std::cout << geom.objects.size() << " objects" << std::endl;
+  std::cout << "now is processing: " << geom.objects.size() << " objects" << std::endl;
 
   // linearize the object indices
   {
@@ -381,7 +393,9 @@ int main(int argc, char** argv) {
   pangolin::Image<uint32_t> modelFaces = pangolin::get<pangolin::Image<uint32_t>>(
       geom.objects.begin()->second.attributes["vertex_indices"]);
 
-  float max_dist = BoundingCubeNormalization(geom, true);
+  // normalize the geom !!!
+  const std::pair<Eigen::Vector3f, float> normalizationParams = ComputeNormalizationParameters(geom);
+  float max_dist = BoundingCubeNormalization(geom, true); // 设为true时normalize geo对象，所有坐标除以maxDistance
 
   if (vis)
     pangolin::CreateWindowAndBind("Main", 640, 480);
@@ -550,15 +564,16 @@ int main(int argc, char** argv) {
   std::cout << elapsed << std::endl;
 
   if (save_ply) {
+    std::cout << "ply file saved: " << plyFileNameOut << std::endl;
     writeSDFToPLY(xyz, sdf, plyFileNameOut, false, true);
   }
 
   std::cout << "num points sampled: " << xyz.size() << std::endl;
   std::size_t save_npz = npyFileName.find("npz");
-  if (save_npz == std::string::npos)
+  if (save_npz == std::string::npos) // std::string::npos: 特殊的常量值，表示在字符串中没有找到匹配的子字符串。它通常被用来表示查找失败或没有找到匹配项的情况。
     writeSDFToNPY(xyz, sdf, npyFileName);
   else {
-    writeSDFToNPZ(xyz, sdf, npyFileName, true);
+    writeSDFToNPZ(xyz, sdf, npyFileName, true, &normalizationParams, meshFileName);
   }
 
   return 0;
