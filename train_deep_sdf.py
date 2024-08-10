@@ -14,6 +14,8 @@ import time
 import deep_sdf
 import deep_sdf.workspace as ws
 
+from tqdm import tqdm
+
 
 class LearningRateSchedule:
     def get_learning_rate(self, epoch):
@@ -254,7 +256,7 @@ def main_function(experiment_directory, continue_from, batch_split):
 
     specs = ws.load_experiment_specifications(experiment_directory)
 
-    logging.info("Experiment description: \n" + specs["Description"])
+    logging.info("Experiment description: \n" + specs["Description"][0])
 
     data_source = specs["DataSource"]
     train_split_file = specs["TrainSplit"]
@@ -449,7 +451,7 @@ def main_function(experiment_directory, continue_from, batch_split):
         )
     )
 
-    for epoch in range(start_epoch, num_epochs + 1):
+    for epoch in tqdm(range(start_epoch, num_epochs + 1)):
 
         start = time.time()
 
@@ -559,7 +561,8 @@ if __name__ == "__main__":
         "--experiment",
         "-e",
         dest="experiment_directory",
-        required=True,
+        # required=True,\
+        default="examples/sofas_new",
         help="The experiment directory. This directory should include "
         + "experiment specifications in 'specs.json', and logging will be "
         + "done in this directory as well.",

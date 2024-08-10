@@ -207,6 +207,14 @@ DeepSDF is relased under the MIT License. See the [LICENSE file][5] for more det
 
 ref to https://cerulean-seahorse-9a8.notion.site/DeepSDF-setup-b7081636f4f24944b567fd46df9996bd?pvs=4
 
+install lib
+
+install openexr
+```
+lhao@node18:~/storage/user/hjp/ws_dditnach/third-party/openexr-2.3.0/build$ cmake -DCMAKE_INSTALL_PREFIX│
+=/home/wiss/lhao/storage/user/hjp/ws_dditnach/third-party/myopenexr/ -DOPENEXR_BUILD_PYTHON_LIBS=OFF ..
+```
+
 ## Preprocessing
 
 original one is slow (2min per obj)

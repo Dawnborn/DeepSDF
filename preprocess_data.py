@@ -68,6 +68,8 @@ def append_data_source_map(data_dir, name, source):
 
     if name in data_source_map:
         if not data_source_map[name] == os.path.abspath(source):
+            print("old {}:{}".format(name, data_source_map[name]))
+            print("new {}:{}".format(name, os.path.abspath(source)))
             raise RuntimeError(
                 "Cannot add data with the same name and a different source."
             )
@@ -114,7 +116,8 @@ if __name__ == "__main__":
         "--split",
         dest="split_filename",
         # required=True,
-        default="examples/splits/sv2_sofas_all_manifoldplus_scanarcw.json",
+        # default="examples/splits/sv2_sofas_all_manifoldplus_scanarcw.json",
+        default="examples/splits/scanarcw_chairs_all_manifoldplus_scanarcw.json",
         help="A split filename defining the shapes to be processed.",
     )
     arg_parser.add_argument(
@@ -127,7 +130,7 @@ if __name__ == "__main__":
     arg_parser.add_argument(
         "--threads",
         dest="num_threads",
-        default=10,
+        default=16,
         help="The number of threads to use to process the data.",
     )
     arg_parser.add_argument(
@@ -153,7 +156,10 @@ if __name__ == "__main__":
 
     deep_sdf.configure_logging(args)
 
-    additional_general_args = ["--sply"]
+    if args.surface_sampling:
+        additional_general_args = []
+    else:
+        additional_general_args = ["--sply"]
 
     deepsdf_dir = os.path.dirname(os.path.abspath(__file__))
     if args.surface_sampling:
@@ -220,13 +226,17 @@ if __name__ == "__main__":
 
             shape_dir = os.path.join(class_path, instance_dir) # 'DATA/ScanARCW/canonical_mesh_manifoldplus/04256520/f551048075b5042d7d6d37ceb4807b31_scene0239_00_ins_5'
 
+
             processed_filepath = os.path.join(target_dir, instance_dir + extension)
             if args.skip and os.path.isfile(processed_filepath):
                 logging.debug("skipping " + processed_filepath)
                 continue
 
             try:
-                mesh_filename = deep_sdf.data.find_mesh_in_directory(shape_dir)
+                if args.source_name == "ShapeNet_manifoldplus":
+                    mesh_filename = os.path.join(class_path, instance_dir+".obj")
+                else:
+                    mesh_filename = deep_sdf.data.find_mesh_in_directory(shape_dir,prefix="model_canonical_manifoldplus")
 
                 specific_args = []
 

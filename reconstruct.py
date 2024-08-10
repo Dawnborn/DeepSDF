@@ -12,6 +12,7 @@ import torch
 import deep_sdf
 import deep_sdf.workspace as ws
 
+from tqdm import tqdm
 
 def reconstruct(
     decoder,
@@ -98,7 +99,8 @@ if __name__ == "__main__":
         "--experiment",
         "-e",
         dest="experiment_directory",
-        required=True,
+        # required=True,
+        default="examples/sofas_new",
         help="The experiment directory which includes specifications and saved model "
         + "files to use for reconstruction",
     )
@@ -114,14 +116,16 @@ if __name__ == "__main__":
         "--data",
         "-d",
         dest="data_source",
-        required=True,
+        # required=True,
+        default="data",
         help="The data source directory.",
     )
     arg_parser.add_argument(
         "--split",
         "-s",
         dest="split_filename",
-        required=True,
+        # required=True,
+        default="examples/splits/sv2_sofas_train_manifoldplus_scanarcw.json",
         help="The split to reconstruct.",
     )
     arg_parser.add_argument(
@@ -211,7 +215,7 @@ if __name__ == "__main__":
     if not os.path.isdir(reconstruction_codes_dir):
         os.makedirs(reconstruction_codes_dir)
 
-    for ii, npz in enumerate(npz_filenames):
+    for ii, npz in tqdm(enumerate(npz_filenames)):
 
         if "npz" not in npz:
             continue
@@ -277,7 +281,7 @@ if __name__ == "__main__":
                 start = time.time()
                 with torch.no_grad():
                     deep_sdf.mesh.create_mesh(
-                        decoder, latent, mesh_filename, N=256, max_batch=int(2 ** 18)
+                        decoder, latent, mesh_filename, N=256, max_batch=int(2 ** 22)
                     )
                 logging.debug("total time: {}".format(time.time() - start))
 

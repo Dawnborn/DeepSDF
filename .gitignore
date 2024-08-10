@@ -1,6 +1,10 @@
 .history
 bin
+bin_at95
+bin*
 build*
 data
 **/__pycache__
 third-party
+*.pth
+*.ply
